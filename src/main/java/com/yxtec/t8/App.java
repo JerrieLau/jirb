@@ -2,10 +2,10 @@ package com.yxtec.t8;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Proxy;
-import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Hello world!
@@ -26,36 +26,55 @@ public class App {
 
     public static void main(String[] args) throws Exception {
         System.out.println(banner);
-        System.out.println("V1.0");
+        System.out.println("V1.0 - Power By Jerrie. ");
+        System.out.println("Usage: ");
+        System.out.println("\t1. multiple line java code must be in code block, like \r\n\t{\r\n\t\tint a = 10;\r\n\t\tint b = 20;\r\n\t\tSystem.out.println(a + b);\r\n\t}");
+        System.out.println("\t2. if you wanna quit the program, please input #exit ");
+        System.out.println("\t3. if you on windows, please execute %JDK_HOME%\\bin\\java.exe -jar jirb.jar ");
+
         System.out.println("\n\n");
 
         int refCount = 0;
         StringBuilder builder = new StringBuilder();
-        Scanner scanner = new Scanner(System.in);
-
-        do {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
             System.out.print("===> ");
-            String line = scanner.next().trim();
+            do {
+                try {
+                    String line = reader.readLine();
 
-            if (StringUtils.isNoneBlank(line)) {
-                builder.append(line);
+                    if (StringUtils.isNoneBlank(line)) {
+                        if(line.equalsIgnoreCase("#exit")) {
+                            break;
+                        }
 
-                if (line.endsWith("{")) {
-                    refCount++; //引用加1
+                        builder.append(line);
+
+                        if (line.endsWith("{")) {
+                            refCount++; //引用加1
+                        }
+
+                        if (line.endsWith("}")) {
+                            refCount--; //引用减1
+                        }
+
+                        builder.append("\n");
+
+                        if (refCount == 0) {
+                            jirbRunn(builder.toString());
+                            builder = new StringBuilder();
+                        } else {
+                            System.out.print("======> ");
+                        }
+                    } else if (refCount > 0) {
+                        builder = new StringBuilder();
+                        System.out.print("===> ");
+                    }
+                } catch (Exception e) {
                 }
+            } while (true);
 
-                if (line.endsWith("}")) {
-                    refCount--; //引用减1
-                }
-
-                builder.append("\n");
-
-                if (refCount == 0) {
-                    jirbRunn(builder.toString());
-                    builder = new StringBuilder();
-                }
-            }
-        } while (scanner.hasNext());
+            System.out.println("Bye.");
+        }
     }
 
     public static void jirbRunn(String source) throws IOException, InterruptedException {
@@ -63,6 +82,6 @@ public class App {
         JirbRunner jirbRunner = (JirbRunner) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[]{JirbRunner.class}, proxy);
         String result = jirbRunner.run(source);
         System.out.println("<=== " + result);
-        System.out.println();
+        System.out.print("===> ");
     }
 }
