@@ -74,6 +74,7 @@ public class App {
             } while (true);
 
             System.out.println("Bye.");
+            System.exit(0);
         }
     }
 
